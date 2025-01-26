@@ -50,7 +50,7 @@ print(video_details)
 # Initialize LangChain with OpenAI's GPT model
 llm = ChatOpenAI(model="gpt-4", temperature=0.7, openai_api_key=OPENAI_API_KEY)
 
-# Define the LangChain prompt
+# Define the LangChain prompt for channel context
 context_prompt = PromptTemplate(
     input_variables=["video_details"],
     template=(
@@ -62,10 +62,62 @@ context_prompt = PromptTemplate(
     )
 )
 
-# Define the LangChain
+# Define the Chain for generating channel context
 channel_context_chain = LLMChain(llm=llm, prompt=context_prompt)
 
 # Generate channel context using LangChain
 channel_context = channel_context_chain.run({"video_details": video_details})
 print("\nChannel Context:")
 print(channel_context)
+
+# Define the LangChain prompt for video idea generation
+video_idea_prompt = PromptTemplate(
+    input_variables=["channel_context", "video_details", "recent_titles"],
+    template=(
+        "Based on the following channel context:\n"
+        "{channel_context}\n\n"
+        "And the following list of video titles and their respective view counts:\n"
+        "{video_details}\n\n"
+        "Also consider these recent video titles to avoid repetition:\n"
+        "{recent_titles}\n\n"
+        "Suggest a new, creative video idea with a focus on maximizing views and interest. "
+        "The idea should be unique and engaging. Provide only the title of the video."
+    )
+)
+
+# Define the Chain for generating video ideas
+video_idea_chain = LLMChain(llm=llm, prompt=video_idea_prompt)
+
+# Ensure the data folder exists
+data_folder = "data"
+os.makedirs(data_folder, exist_ok=True)
+
+# Path for recent_titles.txt
+recent_titles_file = os.path.join(data_folder, "recent_titles.txt")
+
+# Check if the file exists, and create it if not
+if not os.path.exists(recent_titles_file):
+    with open(recent_titles_file, "w") as file:
+        pass
+
+# Read recent video titles from the file
+with open(recent_titles_file, "r") as file:
+    recent_titles = [line.strip() for line in file if line.strip()]
+
+recent_titles_str = "\n".join(recent_titles) if recent_titles else "None"
+
+# Generate a new video idea
+new_video_title = video_idea_chain.run({
+    "channel_context": channel_context,
+    "video_details": video_details,
+    "recent_titles": recent_titles_str
+})
+print("\nNew Video Title:")
+print(new_video_title)
+
+# Update the recent titles file to maintain only the last 10 titles
+recent_titles.append(new_video_title.strip())
+recent_titles = recent_titles[-10:]  # Keep only the last 10 titles
+
+with open(recent_titles_file, "w") as file:
+    file.write("\n".join(recent_titles))
