@@ -1,0 +1,7 @@
+openai==0.27.8
+langchain
+langchain-community
+google-cloud-texttospeech
+requests
+pillow
+moviepy

@@ -1,14 +1,16 @@
 import os
-from dotenv import load_dotenv 
-from youtube_retriever import YoutubeRetriever
+import warnings
+from dotenv import load_dotenv
+from src.youtube_retriever import YoutubeRetriever
 from langchain.chains import LLMChain
-from langchain.chat_models import ChatOpenAI
+from langchain_community.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
 
-# Load environment variables from a .env file
+# Load environment variables from .env file
+warnings.filterwarnings("ignore")
 load_dotenv()
 
-# Load API Keys from environment variables
+# Retrieve API keys from environment variables
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
 
@@ -26,10 +28,29 @@ with open(handles_file, "r") as file:
 if not handles:
     raise ValueError("No handles found in the file. Please add handles line by line in 'handles.txt'.")
 
-# Configuring the GPT model
+# Initialize YoutubeRetriever
+retriever = YoutubeRetriever(api_key=YOUTUBE_API_KEY)
+
+# Retrieve channel IDs
+channel_ids = retriever.get_channel_ids(handles)
+print("Channel IDs:", channel_ids)
+
+# Retrieve video details
+video_details_list = retriever.get_video_details(list(channel_ids.values()))
+
+# Format video details for the LangChain prompt
+video_details = "\n".join(
+    f"Title: {video['title']}, Views: {video['views']}, Channel ID: {video['channel_id']}"
+    for video in video_details_list
+)
+
+print("\nVideo Details:")
+print(video_details)
+
+# Initialize LangChain with OpenAI's GPT model
 llm = ChatOpenAI(model="gpt-4", temperature=0.7, openai_api_key=OPENAI_API_KEY)
 
-# Prompt Template to generate the channel context
+# Define the LangChain prompt
 context_prompt = PromptTemplate(
     input_variables=["video_details"],
     template=(
@@ -41,29 +62,10 @@ context_prompt = PromptTemplate(
     )
 )
 
-# Define the Chain
+# Define the LangChain
 channel_context_chain = LLMChain(llm=llm, prompt=context_prompt)
 
-# Retrieve video details using YoutubeRetriever
-retriever = YoutubeRetriever(api_key=YOUTUBE_API_KEY)
-
-# Step 1: Get Channel IDs
-channel_ids = retriever.get_channel_ids(handles)
-print("Channel IDs:", channel_ids)
-
-# Step 2: Get Video Details
-video_details_list = retriever.get_video_details(list(channel_ids.values()))
-
-# Format video details for the prompt
-video_details = "\n".join(
-    f"Title: {video['title']}, Views: {video['views']}, Channel ID: {video['channel_id']}"
-    for video in video_details_list
-)
-
-print("\nVideo Details:")
-print(video_details)
-
-# Step 3: Generate the channel context using LangChain
+# Generate channel context using LangChain
 channel_context = channel_context_chain.run({"video_details": video_details})
 print("\nChannel Context:")
 print(channel_context)
