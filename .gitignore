@@ -1,5 +1,5 @@
 .env
 handles.txt
 __pycache__
-data/recent_titles.txt
+data
 tmp
