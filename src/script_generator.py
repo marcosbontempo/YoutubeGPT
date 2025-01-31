@@ -32,7 +32,7 @@ class ScriptGenerator:
         # Define memory to keep track of previous interactions
         self.memory = ConversationBufferMemory(return_messages=True, input_key="combined_input")
 
-    def retrieve_video_details(self, handles_file="../handles.txt"):
+    def retrieve_video_details(self, handles_file="handles.txt"):
         """
         Retrieve channel IDs and video details from YouTube based on the handles file.
         """
@@ -87,7 +87,7 @@ class ScriptGenerator:
 
         return channel_context
 
-    def generate_unique_video_title(self, recent_titles_file="../data/recent_titles.txt"):
+    def generate_unique_video_title(self, recent_titles_file="data/recent_titles.txt"):
         """
         Generate a unique video title, ensuring it doesn't repeat recent titles.
         """
@@ -177,7 +177,7 @@ class ScriptGenerator:
         end = end_chain.run({"combined_input": combined_input})
 
         # Ensure the directory exists for paragraphs
-        paragraphs_dir = "../tmp/paragraphs"
+        paragraphs_dir = "tmp/paragraphs"
         os.makedirs(paragraphs_dir, exist_ok=True)
 
         # Save each section to separate files
@@ -196,23 +196,3 @@ class ScriptGenerator:
         print(full_script)
 
         return beginning, middle, end, full_script
-
-
-# Example of using the class
-
-if __name__ == "__main__":
-    # Create an instance of ScriptGenerator
-    script_generator = ScriptGenerator()
-
-    # Retrieve video details and generate channel context
-    video_details = script_generator.retrieve_video_details()
-    channel_context = script_generator.generate_channel_context(video_details)
-
-    # Generate unique video title
-    video_title = script_generator.generate_unique_video_title()
-
-    # Combine channel context and video title into a single input for memory
-    combined_input = f"Channel Context: {channel_context}\nVideo Title: {video_title}"
-
-    # Generate the full video script
-    beginning, middle, end, full_script = script_generator.generate_video_script(combined_input)

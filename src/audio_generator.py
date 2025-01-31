@@ -27,9 +27,13 @@ class AudioGenerator:
         # Set up the OpenAI GPT-4 model with LangChain (using ChatOpenAI)
         self.llm = ChatOpenAI(temperature=0.7, model="gpt-4")
 
+        # Ensure the tmp/audios directory exists
+        self.audio_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'tmp', 'audios')
+        os.makedirs(self.audio_dir, exist_ok=True)
+
     def get_ssml_text(self, paragraph_files=["beginning.txt", "middle.txt", "end.txt"]):
         """
-        Reads the paragraph files from the ../tmp/paragraphs folder and generates SSML for each paragraph.
+        Reads the paragraph files from the tmp/paragraphs folder and generates SSML for each paragraph.
         
         :param paragraph_files: List of paragraph filenames.
         :return: Dictionary containing the SSML generated for each paragraph.
@@ -37,7 +41,7 @@ class AudioGenerator:
         ssml_texts = []
 
         for file_name in paragraph_files:
-            file_path = os.path.join("..", "tmp", "paragraphs", file_name)
+            file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'tmp', 'paragraphs', file_name)
 
             # Check if the file exists
             if not os.path.exists(file_path):
@@ -47,10 +51,6 @@ class AudioGenerator:
             with open(file_path, "r") as file:
                 paragraph_text = file.read()
 
-            # Print the paragraph text to check if it is read correctly
-            print(f"Reading file: {file_name}")
-            print(f"Paragraph text: {paragraph_text}")
-
             # Generate SSML for the paragraph using LangChain + GPT-4
             prompt_template = """
             Generate high-quality SSML for the following paragraph. Use SSML tags such as <break>, <prosody>, <emphasis>, etc., to add pauses and tone variation.
@@ -59,9 +59,6 @@ class AudioGenerator:
             prompt = PromptTemplate(input_variables=["paragraph_text"], template=prompt_template)
             chain = LLMChain(llm=self.llm, prompt=prompt)
             ssml_text = chain.run(paragraph_text)
-
-            # Log the generated SSML to check if it's empty
-            print(f"Generated SSML for {file_name}: {ssml_text}")
 
             if ssml_text.strip():  # Check if SSML is non-empty
                 ssml_texts.append(ssml_text)
@@ -99,8 +96,9 @@ class AudioGenerator:
             input=synthesis_input, voice=voice, audio_config=audio_config
         )
 
-        # Save the audio to the specified file
-        with open("../tmp/" + output_file, "wb") as out:
+        # Save the audio to the specified file in the tmp/audios folder
+        output_path = os.path.join(self.audio_dir, output_file)
+        with open(output_path, "wb") as out:
             out.write(response.audio_content)
             print(f"Audio content written to file: {output_file}")
 
@@ -129,19 +127,10 @@ class AudioGenerator:
         combined_audio = AudioSegment.empty()
 
         for file_name in paragraph_files:
-            mp3_file = f"../tmp/{file_name.replace('.txt', '')}.mp3"
+            mp3_file = os.path.join(self.audio_dir, f"{file_name.replace('.txt', '')}.mp3")
             audio = AudioSegment.from_mp3(mp3_file)
             combined_audio += audio  # Concatenate the audio
 
         # Export the combined audio to a single file
-        combined_audio.export("../tmp/combined_paragraphs.mp3", format="mp3")
+        combined_audio.export(os.path.join(self.audio_dir, "combined_paragraphs.mp3"), format="mp3")
         print("Combined audio saved as combined_paragraphs.mp3")
-
-# Example of using the class
-
-if __name__ == "__main__":
-    # Create an instance of AudioGenerator
-    audio_generator = AudioGenerator(language_code="en-US", voice_name="en-US-Neural2-I", gender="MALE")
-
-    # Generate SSML, create MP3s, and combine them into one MP3
-    audio_generator.generate_audio_for_paragraphs()

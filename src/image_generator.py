@@ -17,6 +17,10 @@ class ImageGenerator:
         # Set up the OpenAI GPT-4 model with LangChain (using ChatOpenAI)
         self.llm = ChatOpenAI(temperature=0.7, model="gpt-4")  # Use the correct GPT-4 model
 
+        # Ensure the tmp/images directory exists
+        self.images_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'tmp', 'images')
+        os.makedirs(self.images_dir, exist_ok=True)
+
     def get_image_prompt(self, paragraph_text):
         """
         Generate a prompt for image generation based on a paragraph.
@@ -38,7 +42,7 @@ class ImageGenerator:
 
     def generate_image_prompts(self, paragraph_files=["beginning.txt", "middle.txt", "end.txt"]):
         """
-        Reads the paragraph files from ../tmp/paragraphs and generates image prompts for each paragraph.
+        Reads the paragraph files from tmp/paragraphs and generates image prompts for each paragraph.
         
         :param paragraph_files: List of paragraph filenames.
         :return: Dictionary containing the image prompt for each paragraph.
@@ -46,7 +50,7 @@ class ImageGenerator:
         image_prompts = {}
 
         for file_name in paragraph_files:
-            file_path = os.path.join("..", "tmp", "paragraphs", file_name)
+            file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'tmp', 'paragraphs', file_name)
 
             # Check if the file exists
             if not os.path.exists(file_path):
@@ -69,7 +73,7 @@ class ImageGenerator:
 
         return image_prompts
 
-    def save_prompts_to_file(self, image_prompts, output_file="../tmp/image_prompts.txt"):
+    def save_prompts_to_file(self, image_prompts, output_file="tmp/images/image_prompts.txt"):
         """
         Save the generated image prompts to a text file.
         
@@ -80,16 +84,3 @@ class ImageGenerator:
             for file_name, prompt in image_prompts.items():
                 file.write(f"{file_name}:\n{prompt}\n\n")
         print(f"Image prompts saved to {output_file}")
-
-
-# Example of using the class
-
-if __name__ == "__main__":
-    # Create an instance of ImageGenerator
-    image_generator = ImageGenerator()
-
-    # Generate image prompts for the paragraphs
-    image_prompts = image_generator.generate_image_prompts()
-
-    # Save the prompts to a file
-    image_generator.save_prompts_to_file(image_prompts)
