@@ -9,29 +9,28 @@ from src.image_generator import ImageGenerator
 STEPS = [1, 2, 3]
 
 if __name__ == "__main__":
-    # Step 1: Create the script
+    # Step 1: Create the video script
     if 1 in STEPS:
         print("***** Step 1: Creating the video script... *****")
         script_generator = ScriptGenerator()    
-        video_details = script_generator.retrieve_video_details()  # Retrieve video details
+        video_details = script_generator.retrieve_video_details()  
 
-        channel_context = script_generator.generate_channel_context(video_details)  # Generate channel context
-        video_title = script_generator.generate_unique_video_title()  # Generate a unique video title
+        channel_context = script_generator.generate_channel_context(video_details)  
+        video_title = script_generator.generate_unique_video_title()  
         
-        combined_input = f"Channel Context: {channel_context}\nVideo Title: {video_title}"  # Combine input for memory    
-        beginning, middle, end, full_script = script_generator.generate_video_script(combined_input)  # Generate full video script
+        combined_input = f"Channel Context: {channel_context}\nVideo Title: {video_title}"  
+        beginning, middle, end, full_script = script_generator.generate_video_script(combined_input)  
 
     # Step 2: Generate the audio
     if 2 in STEPS:
         print("\n***** Step 2: Generating the audio... *****")
-        audio_generator = AudioGenerator(language_code="en-US", voice_name="en-US-Neural2-I", gender="MALE")  # Initialize AudioGenerator
-        audio_generator.generate_audio_for_paragraphs()  # Generate audio for the script paragraphs
+        audio_generator = AudioGenerator(language_code="en-US", voice_name="en-US-Neural2-I", gender="MALE")  
+        audio_generator.generate_audio_for_paragraphs()  
 
-    # Step 3: Generate the images
+    # Step 3: Generate and save the images
     if 3 in STEPS:
-        print("\n***** Step 3: Generating the image prompts... *****")
-        image_generator = ImageGenerator()  # Initialize ImageGenerator
-        image_prompts = image_generator.generate_image_prompts()  # Generate image prompts based on the script    
-        image_generator.save_prompts_to_file(image_prompts)  # Save the generated image prompts to a file
+        print("\n***** Step 3: Generating and saving the images... *****")
+        image_generator = ImageGenerator()  
+        image_generator.generate_and_save_images(paragraph_files=["beginning.txt", "middle.txt", "end.txt"])  
 
     print("\n***** Process completed successfully! *****")

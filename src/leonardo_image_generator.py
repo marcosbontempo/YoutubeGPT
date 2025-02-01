@@ -103,9 +103,3 @@ class LeonardoImageGenerator:
             else:
                 print(f"Waiting... (status: {status})")
                 time.sleep(self.delay)
-
-if __name__ == "__main__":
-    prompt = "A dramatic and action-packed scene set in the vastness of space, where a brave penguin, dressed in futuristic armor, is engaged in a fierce battle against a menacing alien."
-
-    image_generator = LeonardoImageGenerator("../tmp/images/paragraph1.jpg")
-    image_generator.manage_request(prompt)
