@@ -152,7 +152,7 @@ class ScriptGenerator:
                 "{combined_input}\n\n"
                 "Write the middle section of the video as if it were being spoken directly to the audience. "
                 "Focus on delivering insights and keeping the listener interested, using clear and conversational language. "
-                "Develop the story in 4 paragraphs, providing deeper insights while maintaining viewer interest."
+                "Develop the story in 3 paragraphs, providing deeper insights while maintaining viewer interest."
             )
         )
 
