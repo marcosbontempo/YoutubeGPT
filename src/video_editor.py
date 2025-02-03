@@ -7,10 +7,18 @@ from PIL import Image
 class VideoEditor:
     def __init__(self, images_dir=None):
         warnings.filterwarnings("ignore")
+        
+        # Define directories
         self.images_dir = images_dir or os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'tmp', 'images')
-        self.delay = 15
-        self.video_width = 1920
-        self.video_height = 1080
+        self.videos_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'tmp', 'videos')
+        
+        # Create the directories if they don't exist
+        os.makedirs(self.images_dir, exist_ok=True)
+        os.makedirs(self.videos_dir, exist_ok=True)
+        
+        # Video settings
+        self.video_width = 1280
+        self.video_height = 720
         self.clip_duration = 5
         self.fade_duration = 2
 
@@ -49,14 +57,16 @@ class VideoEditor:
         # Concatenate clips and generate final video
         final_video = concatenate_videoclips(clips, method="compose", padding=-self.fade_duration)
 
-        # Export the final video
+        # Save the final video to the videos directory
+        video_output_path = os.path.join(self.videos_dir, "output_video.mp4")
         final_video.write_videofile(
-            "output_video.mp4",
+            video_output_path,
             fps=30,                 
             codec="libx264",        
             bitrate="5000k",        
             audio=False             
         )
+        print(f"Video saved at: {video_output_path}")
 
     def add_zoom_effect(self, clip, zoom_factor=1.2, duration=30):
         """

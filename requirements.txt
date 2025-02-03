@@ -3,7 +3,8 @@ langchain
 langchain-community
 google-cloud-texttospeech
 requests
-pillow
+pillow==9.4.0
 moviepy
 pydub
 better-profanity
+moviepy==1.0.3
