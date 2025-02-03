@@ -1,5 +1,6 @@
 import os
 import warnings
+import random
 from moviepy.editor import *
 from moviepy.video.fx.all import crop, fadein, fadeout
 from PIL import Image
@@ -18,7 +19,6 @@ class VideoEditor:
         self.video_width = 1280
         self.video_height = 720
         self.fade_duration = 2
-        
         self.image_audio_map = self.load_audio_durations()
 
     def load_audio_durations(self):
@@ -42,6 +42,8 @@ class VideoEditor:
 
     def create_video(self):
         clips = []
+        audio_clips = []
+        total_duration = 0
         
         for image_name, (duration, audio_path) in self.image_audio_map.items():
             img_path = os.path.join(self.images_dir, image_name)
@@ -50,21 +52,30 @@ class VideoEditor:
                 print(f"Warning: Missing file {img_path} or {audio_path}, skipping.")
                 continue
             
-            clip = ImageClip(img_path, duration=duration).resize(height=self.video_height, width=self.video_width)
-            zoom_clip = self.add_zoom_effect(clip, zoom_factor=1.2, duration=duration)
-            pan_clip = crop(zoom_clip, x1=50, width=self.video_width - 100, y1=50, height=self.video_height - 100)
+            clip = ImageClip(img_path, duration=duration * 1.1).resize((self.video_width * 1.2, self.video_height * 1.2))
+            zoom_direction = random.choice(["in", "out"])
+            zoom_clip = self.add_zoom_effect(clip, zoom_direction, duration)
+            pan_clip = crop(zoom_clip, width=self.video_width, height=self.video_height, x_center=self.video_width//2, y_center=self.video_height//2)
             animated_clip = fadein(pan_clip, self.fade_duration).fadeout(self.fade_duration)
-            audio_clip = AudioFileClip(audio_path).set_duration(duration)
+            
+            audio_clip = AudioFileClip(audio_path).set_start(total_duration).set_duration(duration)
+            total_duration += duration
             final_clip = animated_clip.set_audio(audio_clip)
             clips.append(final_clip)
+            audio_clips.append(audio_clip)
         
-        final_video = concatenate_videoclips(clips, method="compose", padding=-self.fade_duration)
+        final_audio = CompositeAudioClip(audio_clips)
+        final_video = concatenate_videoclips(clips, method="compose", padding=-self.fade_duration).set_audio(final_audio)
+        
         video_output_path = os.path.join(self.videos_dir, "output_video.mp4")
         final_video.write_videofile(video_output_path, fps=30, codec="libx264", bitrate="5000k", audio=True)
         print(f"Video saved at: {video_output_path}")
 
-    def add_zoom_effect(self, clip, zoom_factor=1.2, duration=30):
-        return clip.resize(lambda t: 1 + (zoom_factor - 1) * (t / duration))
+    def add_zoom_effect(self, clip, direction, duration):
+        if direction == "in":
+            return clip.resize(lambda t: 1 + 0.1 * (t / duration))
+        else:
+            return clip.resize(lambda t: 1.2 - 0.1 * (t / duration))
 
 if __name__ == "__main__":
     video_editor = VideoEditor()
