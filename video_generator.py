@@ -5,11 +5,11 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 from src.script_generator import ScriptGenerator
 from src.audio_generator import AudioGenerator
 from src.image_generator import ImageGenerator
+from src.video_editor import VideoEditor
 
-STEPS = [1, 2, 3]
+STEPS = [1, 2, 3, 4]
 
 if __name__ == "__main__":
-    # Step 1: Create the video script
     if 1 in STEPS:
         print("***** Step 1: Creating the video script... *****")
         script_generator = ScriptGenerator()    
@@ -21,16 +21,19 @@ if __name__ == "__main__":
         combined_input = f"Channel Context: {channel_context}\nVideo Title: {video_title}"  
         beginning, middle, end, full_script = script_generator.generate_video_script(combined_input)  
 
-    # Step 2: Generate the audio
     if 2 in STEPS:
         print("\n***** Step 2: Generating the audio... *****")
         audio_generator = AudioGenerator(language_code="en-US", voice_name="en-US-Neural2-I", gender="MALE")  
         audio_generator.generate_audio_for_paragraphs()  
 
-    # Step 3: Generate and save the images
     if 3 in STEPS:
         print("\n***** Step 3: Generating and saving the images... *****")
         image_generator = ImageGenerator()  
         image_generator.generate_and_save_images(paragraph_files=["beginning.txt", "middle.txt", "end.txt"])  
+
+    if 4 in STEPS:
+        print("\n***** Step 4: Creating the video... *****")
+        video_editor = VideoEditor()
+        video_editor.create_video()  
 
     print("\n***** Process completed successfully! *****")
