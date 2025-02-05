@@ -53,7 +53,11 @@ class VideoEditor:
                 continue
             
             clip = ImageClip(img_path, duration=duration * 1.1).resize((self.video_width * 1.2, self.video_height * 1.2))
-            zoom_direction = random.choice(["in", "out"])
+            zoom_direction = random.choice([
+                "in", "out", 
+                "top_left_to_center", "top_right_to_center", 
+                "bottom_left_to_center", "bottom_right_to_center"
+            ])
             zoom_clip = self.add_zoom_effect(clip, zoom_direction, duration)
             pan_clip = crop(zoom_clip, width=self.video_width, height=self.video_height, x_center=self.video_width//2, y_center=self.video_height//2)
             animated_clip = fadein(pan_clip, self.fade_duration).fadeout(self.fade_duration)
@@ -74,8 +78,28 @@ class VideoEditor:
     def add_zoom_effect(self, clip, direction, duration):
         if direction == "in":
             return clip.resize(lambda t: 1 + 0.1 * (t / duration))
-        else:
+        elif direction == "out":
             return clip.resize(lambda t: 1.2 - 0.1 * (t / duration))
+        elif direction == "top_left_to_center":
+            return self.zoom_from_top_left_to_center(clip, duration)
+        elif direction == "top_right_to_center":
+            return self.zoom_from_top_right_to_center(clip, duration)
+        elif direction == "bottom_left_to_center":
+            return self.zoom_from_bottom_left_to_center(clip, duration)
+        elif direction == "bottom_right_to_center":
+            return self.zoom_from_bottom_right_to_center(clip, duration)
+
+    def zoom_from_top_left_to_center(self, clip, duration):
+        return clip.resize(lambda t: 1 + 0.1 * (t / duration)).set_position(lambda t: (0 + (self.video_width // 2) * (t / duration), 0))
+
+    def zoom_from_top_right_to_center(self, clip, duration):
+        return clip.resize(lambda t: 1 + 0.1 * (t / duration)).set_position(lambda t: (self.video_width - (self.video_width // 2) * (t / duration), 0))
+
+    def zoom_from_bottom_left_to_center(self, clip, duration):
+        return clip.resize(lambda t: 1 + 0.1 * (t / duration)).set_position(lambda t: (0 + (self.video_width // 2) * (t / duration), self.video_height - (self.video_height // 2) * (t / duration)))
+
+    def zoom_from_bottom_right_to_center(self, clip, duration):
+        return clip.resize(lambda t: 1 + 0.1 * (t / duration)).set_position(lambda t: (self.video_width - (self.video_width // 2) * (t / duration), self.video_height - (self.video_height // 2) * (t / duration)))
 
 if __name__ == "__main__":
     video_editor = VideoEditor()
