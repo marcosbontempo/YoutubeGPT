@@ -3,3 +3,4 @@ handles.txt
 __pycache__
 data
 tmp
+src/token.pickle

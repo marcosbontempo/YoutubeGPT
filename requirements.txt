@@ -8,3 +8,6 @@ moviepy
 pydub
 better-profanity
 moviepy==1.0.3
+httplib2
+google-api-python-client
+google_auth_oauthlib
