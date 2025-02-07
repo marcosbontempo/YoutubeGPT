@@ -27,7 +27,7 @@ class ScriptGenerator:
         self.retriever = YoutubeRetriever(api_key=self.YOUTUBE_API_KEY)
         
         # Initialize LangChain model
-        self.llm = ChatOpenAI(model="gpt-4", temperature=0.7, openai_api_key=self.OPENAI_API_KEY)
+        self.llm = ChatOpenAI(model="gpt-4", temperature=0.1, openai_api_key=self.OPENAI_API_KEY)
         
         # Define memory to keep track of previous interactions
         self.memory = ConversationBufferMemory(return_messages=True, input_key="combined_input")
@@ -105,10 +105,14 @@ class ScriptGenerator:
         unique_title_prompt = PromptTemplate(
             input_variables=["recent_titles"],
             template=(
-                "Generate a unique and engaging video title based on the channel's context. "
+                "Generate a unique and engaging YouTube video title that is between 60-70 characters long. "
+                "Avoid excessive punctuation or symbols. The title should be clear, concise, and relevant to the content. "
                 "Make sure it is different from the following recent titles:\n"
                 "{recent_titles}\n\n"
-                "Be creative and think about what would catch the audience's attention."
+                "Think about what would catch the audience's attention while remaining true to the content."
+                "Ensure the title is no longer than 70 characters and no shorter than 60 characters. "
+                "If the title goes over 70 characters, adjust it slightly without losing its meaning. "
+                "If the title is under 60 characters, make it slightly longer but still relevant."                
             )
         )
 
@@ -117,7 +121,7 @@ class ScriptGenerator:
 
         # Generate a new video title
         recent_titles_str = "\n".join(recent_titles) if recent_titles else "None"
-        video_title = title_chain.run({"recent_titles": recent_titles_str}).strip()
+        video_title = title_chain.run({"recent_titles": recent_titles_str, "max_tokens": 10}).strip()
 
         # Ensure the new title is added to the recent titles list and keep only the last 10
         recent_titles.append(video_title)
@@ -127,9 +131,44 @@ class ScriptGenerator:
         with open(recent_titles_file, "w") as file:
             file.write("\n".join(recent_titles))
 
+        with open("tmp/paragraphs/video_title.txt", "w") as file:
+            file.write(video_title.strip('\"'))            
+
         print("\nGenerated Video Title:", video_title)
 
         return video_title
+    
+    def generate_seo_description(self):
+        """Generate SEO description directly from memory."""
+        video_context = self.memory.load_memory_variables({})  # Retrieve stored context
+
+        seo_input = f"Generate an SEO-optimized YouTube video description based on the following context:\n{video_context}\n\n"
+
+        seo_prompt = PromptTemplate(
+            input_variables=["seo_input"],
+            template=(
+                "Write a YouTube video description that is SEO-optimized for YouTube. "
+                "Use relevant keywords and make it engaging. Here's the context for the video:\n"
+                "{seo_input}\n\n"
+                "Make the description concise with relevant keywords and a call to action."
+            )
+        )
+
+        # Create chain for generating SEO description
+        seo_description_chain = LLMChain(llm=self.llm, prompt=seo_prompt)
+        seo_description = seo_description_chain.run({"seo_input": seo_input})
+
+        print("\nSEO Description:")
+        print(seo_description)
+
+        # Save SEO description to file
+        seo_description_path = "tmp/paragraphs/seo_description.txt"
+        os.makedirs(os.path.dirname(seo_description_path), exist_ok=True)
+        
+        with open(seo_description_path, "w") as file:
+            file.write(seo_description)
+
+        return seo_description    
 
     def generate_video_script(self, combined_input):
         """
@@ -194,5 +233,8 @@ class ScriptGenerator:
         full_script = f"{beginning}\n\n{middle}\n\n{end}"
         print("\nFull Video Script:")
         print(full_script)
+
+        # Generate SEO description based on the memory content
+        self.generate_seo_description()        
 
         return beginning, middle, end, full_script

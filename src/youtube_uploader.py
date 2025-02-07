@@ -5,7 +5,7 @@ from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from googleapiclient.http import MediaFileUpload
-from tqdm import tqdm  # Importa a biblioteca tqdm para a barra de progresso
+from tqdm import tqdm
 
 class YouTubeUploader:
     def __init__(self, client_secrets_file, api_service_name="youtube", api_version="v3", scopes=["https://www.googleapis.com/auth/youtube.upload"]):
@@ -18,7 +18,6 @@ class YouTubeUploader:
         self.authenticate()
 
     def authenticate(self):
-        """Authenticate the user using OAuth 2.0 and create a service object."""
         if os.path.exists("token.pickle"):
             with open("token.pickle", "rb") as token:
                 self.credentials = pickle.load(token)
@@ -27,8 +26,7 @@ class YouTubeUploader:
             if self.credentials and self.credentials.expired and self.credentials.refresh_token:
                 self.credentials.refresh(Request())
             else:
-                flow = InstalledAppFlow.from_client_secrets_file(
-                    self.client_secrets_file, self.scopes)
+                flow = InstalledAppFlow.from_client_secrets_file(self.client_secrets_file, self.scopes)
                 self.credentials = flow.run_local_server(port=0)
 
             with open("token.pickle", "wb") as token:
@@ -37,8 +35,6 @@ class YouTubeUploader:
         self.service = build(self.api_service_name, self.api_version, credentials=self.credentials)
 
     def upload_video(self, video_file, title, description, category="22", privacy="public"):
-        """Upload a video to YouTube."""
-        # Altere o chunksize para um valor específico, como 256KB (256 * 1024 bytes)
         media = MediaFileUpload(video_file, chunksize=256 * 1024, resumable=True, mimetype="video/*")
         request = self.service.videos().insert(
             part="snippet,status",
@@ -55,33 +51,33 @@ class YouTubeUploader:
             media_body=media
         )
         
-        # Barra de progresso
         response = None
         with tqdm(total=100, unit="%", desc="Uploading video", dynamic_ncols=True) as pbar:
             while response is None:
                 status, response = request.next_chunk()
-                
-                # Atualiza a barra de progresso
                 if status:
-                    progress = int(status.progress() * 100)  # Converte progresso para porcentagem
+                    progress = int(status.progress() * 100)
                     pbar.n = progress
                     pbar.last_print_n = progress
-                    pbar.update(0)  # Atualiza a barra de progresso
+                    pbar.update(0)
 
         print(f"\nUpload complete! Video ID: {response['id']}")
         return response
 
 if __name__ == "__main__":
-    # Caminho relativo para o arquivo credentials.json
     client_secrets_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data', 'youtube_credentials.json')
     
     uploader = YouTubeUploader(client_secrets_file)
 
-    # Caminho relativo para o vídeo a ser carregado
     video_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'tmp', 'videos', 'output_video.mp4')
     
-    # Substitua pelos dados do seu vídeo
-    title = "Sample Video Title"
-    description = "Sample Video Description"
-    
+    paragraphs_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'tmp', 'paragraphs')
+
+    # Get title and description from files in paragraphs_dir
+    with open(os.path.join(paragraphs_dir, 'video_title.txt'), 'r') as file:
+        title = file.read().strip()
+
+    with open(os.path.join(paragraphs_dir, 'seo_description.txt'), 'r') as file:
+        description = file.read().strip()
+  
     uploader.upload_video(video_file, title, description)
