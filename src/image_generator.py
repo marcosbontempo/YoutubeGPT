@@ -31,7 +31,7 @@ class ImageGenerator:
         The image should reflect the tone, environment, and subject matter of the paragraph.
         Use vivid details and imagine the scene in high quality.
 
-        Please ensure that the prompt avoids using any offensive, vulgar, or inappropriate language, 
+        Please ensure that the prompt avoids any offensive, vulgar, or inappropriate language, 
         including any form of the word "fuck" or similar words, and any other profanities or slurs. 
         Ensure that only appropriate and respectful language is used throughout the prompt.
 
@@ -46,7 +46,36 @@ class ImageGenerator:
         clean_prompt = profanity.censor(image_prompt)
         return clean_prompt[:1500]
 
-    def generate_and_save_images(self, paragraph_files=["beginning.txt", "middle.txt", "end.txt"]):
+    def get_thumbnail_prompt(self, title, video_topic):
+        """
+        Generate a highly engaging prompt for creating a YouTube thumbnail.
+        """
+        prompt_template = """
+        Generate a visually striking and engaging YouTube thumbnail image based on the following details.
+        The thumbnail should be eye-catching, with vibrant colors, dramatic lighting, and bold composition.
+        Ensure that the image captures attention and conveys the essence of the video topic.
+        
+        Video Title: {title}
+        Video Topic: {video_topic}
+        
+        The image should focus on:
+        - A bold, clear central subject.
+        - High contrast and sharp details.
+        - Expressive emotions, dramatic poses, or dynamic movement.
+        - Avoid any offensive or inappropriate content.
+        
+        Generate a detailed prompt for this thumbnail.
+        """
+        
+        prompt = PromptTemplate(input_variables=["title", "video_topic"], template=prompt_template)
+        chain = LLMChain(llm=self.llm, prompt=prompt)
+        thumbnail_prompt = chain.run(title=title, video_topic=video_topic)
+
+        # Apply profanity filter to the generated prompt
+        clean_prompt = profanity.censor(thumbnail_prompt)
+        return clean_prompt[:1500]
+
+    def generate_and_save_images(self, paragraph_files=["beginning.txt", "middle.txt", "end.txt"], video_title="Default Title", video_topic="Default Topic"):
         """
         Reads the paragraph files from tmp/paragraphs and generates and saves images for each paragraph.
         """
@@ -73,6 +102,13 @@ class ImageGenerator:
                 image_generator.manage_request(image_prompt)  # Generate and save the image
                 print()
 
+        # Generate thumbnail prompt and image
+        print("Generating thumbnail image...")
+        thumbnail_prompt = self.get_thumbnail_prompt(video_title, video_topic)
+        thumbnail_path = os.path.join(self.images_dir, "thumbnail.jpg")
+        thumbnail_generator = LeonardoImageGenerator(thumbnail_path)
+        thumbnail_generator.manage_request(thumbnail_prompt)
+
         self.save_prompts_to_file(image_prompts)
 
     def save_prompts_to_file(self, image_prompts):
@@ -91,5 +127,5 @@ if __name__ == "__main__":
     # Create an instance of ImageGenerator
     image_generator = ImageGenerator()
 
-    # Generate and save images for the paragraphs in specified files
-    image_generator.generate_and_save_images(paragraph_files=["beginning.txt", "middle.txt", "end.txt"])
+    # Generate and save images for the paragraphs in specified files, and create a thumbnail
+    image_generator.generate_and_save_images(paragraph_files=["beginning.txt", "middle.txt", "end.txt"], video_title="My Video", video_topic="AI and Automation")
