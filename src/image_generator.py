@@ -103,8 +103,16 @@ class ImageGenerator:
                 print()
 
         # Generate thumbnail prompt and image
+        paragraphs_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'tmp', 'paragraphs')
+
+        with open(os.path.join(paragraphs_dir, 'video_title.txt'), 'r') as file:
+            title = file.read().strip()
+
+        with open(os.path.join(paragraphs_dir, 'seo_description.txt'), 'r') as file:
+            description = file.read().strip()
+
         print("Generating thumbnail image...")
-        thumbnail_prompt = self.get_thumbnail_prompt(video_title, video_topic)
+        thumbnail_prompt = self.get_thumbnail_prompt(title, description)
         thumbnail_path = os.path.join(self.images_dir, "thumbnail.jpg")
         thumbnail_generator = LeonardoImageGenerator(thumbnail_path)
         thumbnail_generator.manage_request(thumbnail_prompt)
