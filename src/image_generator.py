@@ -75,7 +75,9 @@ class ImageGenerator:
         clean_prompt = profanity.censor(thumbnail_prompt)
         return clean_prompt[:1500]
 
-    def generate_and_save_images(self, paragraph_files=["beginning.txt", "middle.txt", "end.txt"], video_title="Default Title", video_topic="Default Topic"):
+    def generate_and_save_images(self, paragraph_files=["intro.txt", "call_to_adventure.txt", "refusal_of_call.txt", 
+                                                       "mentor.txt", "crossing_the_threshold.txt", "trials_and_allies.txt", 
+                                                       "climax_and_return.txt"]):
         """
         Reads the paragraph files from tmp/paragraphs and generates and saves images for each paragraph.
         """
@@ -136,4 +138,4 @@ if __name__ == "__main__":
     image_generator = ImageGenerator()
 
     # Generate and save images for the paragraphs in specified files, and create a thumbnail
-    image_generator.generate_and_save_images(paragraph_files=["beginning.txt", "middle.txt", "end.txt"], video_title="My Video", video_topic="AI and Automation")
+    image_generator.generate_and_save_images()

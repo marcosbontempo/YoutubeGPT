@@ -29,7 +29,7 @@ if __name__ == "__main__":
     if 3 in STEPS:
         print("\n***** Step 3: Generating and saving the images... *****")
         image_generator = ImageGenerator()  
-        image_generator.generate_and_save_images(paragraph_files=["beginning.txt", "middle.txt", "end.txt"])  
+        image_generator.generate_and_save_images()  
 
     if 4 in STEPS:
         print("\n***** Step 4: Creating the video... *****")
