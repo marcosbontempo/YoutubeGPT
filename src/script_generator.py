@@ -172,69 +172,129 @@ class ScriptGenerator:
 
     def generate_video_script(self, combined_input):
         """
-        Generate the video script (beginning, middle, and end) using LangChain.
+        Generate the video script (Hero's Journey) using LangChain.
         """
-        # Define prompts for generating video script
-        beginning_prompt = PromptTemplate(
+        # Define prompts for each part of the Hero's Journey
+        intro_prompt = PromptTemplate(
             input_variables=["combined_input"],
             template=(
                 "{combined_input}\n\n"
-                "Write the beginning of the video as if it were being spoken directly to the audience. "
-                "Focus on engaging the listener with clear and natural language, without scene descriptions or annotations. "
-                "Create 3 engaging paragraphs to grab the audience's attention, introduce the topic, and spark curiosity."
+                "Write the Introduction, introducing the main character and their world. "
+                "Set the scene, establishing the protagonist's normal life in 3 paragraphs."
             )
         )
 
-        middle_prompt = PromptTemplate(
+        call_to_adventure_prompt = PromptTemplate(
             input_variables=["combined_input"],
             template=(
                 "{combined_input}\n\n"
-                "Write the middle section of the video as if it were being spoken directly to the audience. "
-                "Focus on delivering insights and keeping the listener interested, using clear and conversational language. "
-                "Develop the story in 3 paragraphs, providing deeper insights while maintaining viewer interest."
+                "Write the Call to Adventure, explaining what challenges or events lead the protagonist to begin their journey. "
+                "Describe in 3 paragraphs how the protagonist is drawn into the adventure."
             )
         )
 
-        end_prompt = PromptTemplate(
+        refusal_of_call_prompt = PromptTemplate(
             input_variables=["combined_input"],
             template=(
                 "{combined_input}\n\n"
-                "Write the conclusion of the video as if it were being spoken directly to the audience. "
-                "Focus on wrapping up the story naturally, leaving the audience with a thought-provoking question or idea. "
-                "Create 3 paragraphs that summarize the content, inspire further thought, and encourage engagement."
+                "Write the Refusal of the Call, where the protagonist resists or hesitates to take on the challenge. "
+                "Create 3 paragraphs showing the inner conflict or doubt of the protagonist."
             )
         )
 
-        # Create chains for beginning, middle, and end using memory
-        beginning_chain = LLMChain(llm=self.llm, prompt=beginning_prompt, memory=self.memory)
-        middle_chain = LLMChain(llm=self.llm, prompt=middle_prompt, memory=self.memory)
-        end_chain = LLMChain(llm=self.llm, prompt=end_prompt, memory=self.memory)
+        mentor_prompt = PromptTemplate(
+            input_variables=["combined_input"],
+            template=(
+                "{combined_input}\n\n"
+                "Write the Meeting with the Mentor, where the protagonist encounters a guide or helper who provides wisdom or power. "
+                "Write 3 paragraphs about the mentor's impact."
+            )
+        )
 
-        # Generate video script
-        beginning = beginning_chain.run({"combined_input": combined_input})
-        middle = middle_chain.run({"combined_input": combined_input})
-        end = end_chain.run({"combined_input": combined_input})
+        crossing_the_threshold_prompt = PromptTemplate(
+            input_variables=["combined_input"],
+            template=(
+                "{combined_input}\n\n"
+                "Write the Crossing of the Threshold, where the protagonist fully commits to the adventure and leaves the ordinary world behind. "
+                "Write 3 paragraphs describing this turning point."
+            )
+        )
+
+        trials_and_allies_prompt = PromptTemplate(
+            input_variables=["combined_input"],
+            template=(
+                "{combined_input}\n\n"
+                "Write the Trials, Allies, and Enemies, where the protagonist faces challenges, makes allies, and confronts enemies. "
+                "Provide 3 paragraphs detailing the challenges faced during the journey."
+            )
+        )
+
+        climax_and_return_prompt = PromptTemplate(
+            input_variables=["combined_input"],
+            template=(
+                "{combined_input}\n\n"
+                "Write the Climax and Return with the Elixir, where the protagonist confronts the main challenge and returns home transformed. "
+                "Write 3 paragraphs about the final battle and the protagonist's return."
+            )
+        )
+
+        # Create chains for each part of the Hero's Journey
+        intro_chain = LLMChain(llm=self.llm, prompt=intro_prompt, memory=self.memory)
+        call_to_adventure_chain = LLMChain(llm=self.llm, prompt=call_to_adventure_prompt, memory=self.memory)
+        refusal_of_call_chain = LLMChain(llm=self.llm, prompt=refusal_of_call_prompt, memory=self.memory)
+        mentor_chain = LLMChain(llm=self.llm, prompt=mentor_prompt, memory=self.memory)
+        crossing_the_threshold_chain = LLMChain(llm=self.llm, prompt=crossing_the_threshold_prompt, memory=self.memory)
+        trials_and_allies_chain = LLMChain(llm=self.llm, prompt=trials_and_allies_prompt, memory=self.memory)
+        climax_and_return_chain = LLMChain(llm=self.llm, prompt=climax_and_return_prompt, memory=self.memory)
+
+        # Generate video script parts
+        intro = intro_chain.run({"combined_input": combined_input})
+        print("\nIntro section generated.")
+        call_to_adventure = call_to_adventure_chain.run({"combined_input": combined_input})
+        print("Call to Adventure section generated.")
+        refusal_of_call = refusal_of_call_chain.run({"combined_input": combined_input})
+        print("Refusal of Call section generated.")
+        mentor = mentor_chain.run({"combined_input": combined_input})
+        print("Mentor section generated.")
+        crossing_the_threshold = crossing_the_threshold_chain.run({"combined_input": combined_input})
+        print("Crossing the Threshold section generated.")
+        trials_and_allies = trials_and_allies_chain.run({"combined_input": combined_input})
+        print("Trials and Allies section generated.")
+        climax_and_return = climax_and_return_chain.run({"combined_input": combined_input})
+        print("Climax and Return section generated.")        
 
         # Ensure the directory exists for paragraphs
         paragraphs_dir = "tmp/paragraphs"
         os.makedirs(paragraphs_dir, exist_ok=True)
 
         # Save each section to separate files
-        with open(os.path.join(paragraphs_dir, "beginning.txt"), "w") as file:
-            file.write(beginning)
+        with open(os.path.join(paragraphs_dir, "intro.txt"), "w") as file:
+            file.write(intro)
 
-        with open(os.path.join(paragraphs_dir, "middle.txt"), "w") as file:
-            file.write(middle)
+        with open(os.path.join(paragraphs_dir, "call_to_adventure.txt"), "w") as file:
+            file.write(call_to_adventure)
 
-        with open(os.path.join(paragraphs_dir, "end.txt"), "w") as file:
-            file.write(end)
+        with open(os.path.join(paragraphs_dir, "refusal_of_call.txt"), "w") as file:
+            file.write(refusal_of_call)
+
+        with open(os.path.join(paragraphs_dir, "mentor.txt"), "w") as file:
+            file.write(mentor)
+
+        with open(os.path.join(paragraphs_dir, "crossing_the_threshold.txt"), "w") as file:
+            file.write(crossing_the_threshold)
+
+        with open(os.path.join(paragraphs_dir, "trials_and_allies.txt"), "w") as file:
+            file.write(trials_and_allies)
+
+        with open(os.path.join(paragraphs_dir, "climax_and_return.txt"), "w") as file:
+            file.write(climax_and_return)
 
         # Combine all parts of the script
-        full_script = f"{beginning}\n\n{middle}\n\n{end}"
-        print("\nFull Video Script:")
-        print(full_script)
+        full_script = f"{intro}\n\n{call_to_adventure}\n\n{refusal_of_call}\n\n{mentor}\n\n{crossing_the_threshold}\n\n{trials_and_allies}\n\n{climax_and_return}"
+        print("\nFull Video Script generated")
+        #print(full_script)
 
         # Generate SEO description based on the memory content
         self.generate_seo_description()        
 
-        return beginning, middle, end, full_script
+        return intro, call_to_adventure, refusal_of_call, mentor, crossing_the_threshold, trials_and_allies, climax_and_return, full_script

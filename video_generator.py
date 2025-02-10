@@ -19,7 +19,7 @@ if __name__ == "__main__":
         video_title = script_generator.generate_unique_video_title()  
         
         combined_input = f"Channel Context: {channel_context}\nVideo Title: {video_title}"  
-        beginning, middle, end, full_script = script_generator.generate_video_script(combined_input)  
+        script_generator.generate_video_script(combined_input)  
 
     if 2 in STEPS:
         print("\n***** Step 2: Generating the audio... *****")
