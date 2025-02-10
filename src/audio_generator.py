@@ -69,7 +69,9 @@ class AudioGenerator:
         audio = AudioSegment.from_mp3(output_path)
         return len(audio) / 1000  # Duration in seconds
 
-    def generate_audio_for_paragraphs(self, paragraph_files=["beginning.txt", "middle.txt", "end.txt"]):
+    def generate_audio_for_paragraphs(self, paragraph_files=["intro.txt", "call_to_adventure.txt", "refusal_of_call.txt", 
+                                                           "mentor.txt", "crossing_the_threshold.txt", "trials_and_allies.txt", 
+                                                           "climax_and_return.txt"]):
         """
         Generate audio for each paragraph, save them as individual MP3 files, and calculate the duration.
         """
@@ -89,6 +91,7 @@ class AudioGenerator:
                 print(f"Generating audio for Paragraph {i} in {section}")
                 ssml_text = self.get_ssml_text(paragraph)
                 mp3_file_name = f"{section.replace('.txt', '')}_paragraph_{i}.mp3"
+
                 duration = self.narrate_text_with_ssml(ssml_text, output_file=mp3_file_name)
                 audio_durations[mp3_file_name] = duration
 
@@ -104,5 +107,5 @@ class AudioGenerator:
 # Example usage
 if __name__ == "__main__":
     audio_generator = AudioGenerator()
-    durations = audio_generator.generate_audio_for_paragraphs(paragraph_files=["beginning.txt", "middle.txt", "end.txt"])
+    durations = audio_generator.generate_audio_for_paragraphs()
     print(f"Durations of each paragraph's audio: {durations}")

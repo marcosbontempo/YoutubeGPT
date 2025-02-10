@@ -181,6 +181,7 @@ class ScriptGenerator:
                 "{combined_input}\n\n"
                 "Write the Introduction, introducing the main character and their world. "
                 "Set the scene, establishing the protagonist's normal life in 3 paragraphs."
+                "You should write only the text, without including the word Introduction as the title."
             )
         )
 
