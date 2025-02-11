@@ -86,6 +86,14 @@ class ScriptGenerator:
         print(channel_context)
 
         return channel_context
+    
+    def read_context_from_file(self, filename):
+        """Utility function to read content from a file if it exists."""
+        file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', filename)
+        if os.path.exists(file_path):
+            with open(file_path, "r") as file:
+                return file.read().strip()
+        return ""    
 
     def generate_unique_video_title(self, recent_titles_file="data/recent_titles.txt"):
         """
@@ -93,6 +101,9 @@ class ScriptGenerator:
         """
         # Ensure the directory exists for storing recent titles
         os.makedirs(os.path.dirname(recent_titles_file), exist_ok=True)
+
+         # Read title context from title_context.txt if exists
+        title_context = self.read_context_from_file("title_context.txt")
 
         # Load recent titles
         if os.path.exists(recent_titles_file):
@@ -103,8 +114,9 @@ class ScriptGenerator:
 
         # Define prompt to generate a unique video title
         unique_title_prompt = PromptTemplate(
-            input_variables=["recent_titles"],
+            input_variables=["recent_titles", "title_context"],
             template=(
+                "Context: {title_context}\n\n"                
                 "Generate a unique and engaging YouTube video title that is between 60-70 characters long. "
                 "Avoid excessive punctuation or symbols. The title should be clear, concise, and relevant to the content. "
                 "Make sure it is different from the following recent titles:\n"
@@ -174,10 +186,14 @@ class ScriptGenerator:
         """
         Generate the video script (Hero's Journey) using LangChain.
         """
+        # Read script context from script_context.txt if exists
+        script_context = self.read_context_from_file("script_context.txt")
+
         # Define prompts for each part of the Hero's Journey
         intro_prompt = PromptTemplate(
-            input_variables=["combined_input"],
+            input_variables=["combined_input", "script_context"],
             template=(
+                "Context: {script_context}\n\n"
                 "{combined_input}\n\n"
                 "Write the Introduction, introducing the main character and their world. "
                 "Set the scene, establishing the protagonist's normal life in 3 paragraphs."
@@ -186,8 +202,9 @@ class ScriptGenerator:
         )
 
         call_to_adventure_prompt = PromptTemplate(
-            input_variables=["combined_input"],
+            input_variables=["combined_input", "script_context"],
             template=(
+                "Context: {script_context}\n\n"
                 "{combined_input}\n\n"
                 "Write the Call to Adventure, explaining what challenges or events lead the protagonist to begin their journey. "
                 "Describe in 3 paragraphs how the protagonist is drawn into the adventure."
@@ -195,8 +212,9 @@ class ScriptGenerator:
         )
 
         refusal_of_call_prompt = PromptTemplate(
-            input_variables=["combined_input"],
+            input_variables=["combined_input", "script_context"],
             template=(
+                "Context: {script_context}\n\n"
                 "{combined_input}\n\n"
                 "Write the Refusal of the Call, where the protagonist resists or hesitates to take on the challenge. "
                 "Create 3 paragraphs showing the inner conflict or doubt of the protagonist."
@@ -204,8 +222,9 @@ class ScriptGenerator:
         )
 
         mentor_prompt = PromptTemplate(
-            input_variables=["combined_input"],
+            input_variables=["combined_input", "script_context"],
             template=(
+                "Context: {script_context}\n\n"
                 "{combined_input}\n\n"
                 "Write the Meeting with the Mentor, where the protagonist encounters a guide or helper who provides wisdom or power. "
                 "Write 3 paragraphs about the mentor's impact."
@@ -213,8 +232,9 @@ class ScriptGenerator:
         )
 
         crossing_the_threshold_prompt = PromptTemplate(
-            input_variables=["combined_input"],
+            input_variables=["combined_input", "script_context"],
             template=(
+                "Context: {script_context}\n\n"
                 "{combined_input}\n\n"
                 "Write the Crossing of the Threshold, where the protagonist fully commits to the adventure and leaves the ordinary world behind. "
                 "Write 3 paragraphs describing this turning point."
@@ -222,8 +242,9 @@ class ScriptGenerator:
         )
 
         trials_and_allies_prompt = PromptTemplate(
-            input_variables=["combined_input"],
+            input_variables=["combined_input", "script_context"],
             template=(
+                "Context: {script_context}\n\n"
                 "{combined_input}\n\n"
                 "Write the Trials, Allies, and Enemies, where the protagonist faces challenges, makes allies, and confronts enemies. "
                 "Provide 3 paragraphs detailing the challenges faced during the journey."
@@ -231,8 +252,9 @@ class ScriptGenerator:
         )
 
         climax_and_return_prompt = PromptTemplate(
-            input_variables=["combined_input"],
+            input_variables=["combined_input", "script_context"],
             template=(
+                "Context: {script_context}\n\n"
                 "{combined_input}\n\n"
                 "Write the Climax and Return with the Elixir, where the protagonist confronts the main challenge and returns home transformed. "
                 "Write 3 paragraphs about the final battle and the protagonist's return."

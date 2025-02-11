@@ -4,3 +4,7 @@ __pycache__
 data
 tmp
 src/token.pickle
+image_context.txt
+script_context.txt
+thumbnail_context.txt
+title_context.txt
