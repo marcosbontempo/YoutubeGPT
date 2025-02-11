@@ -22,10 +22,21 @@ class ImageGenerator:
         self.images_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'tmp', 'images')
         os.makedirs(self.images_dir, exist_ok=True)
 
+    def read_context_from_file(self, filename):
+        """Utility function to read content from a file if it exists."""
+        file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', filename)
+        if os.path.exists(file_path):
+            with open(file_path, "r") as file:
+                return file.read().strip()
+        return ""        
+
     def get_image_prompt(self, paragraph_text):
         """
         Generate a prompt for image generation based on a paragraph.
         """
+
+        image_context = self.read_context_from_file("image_context.txt")
+
         prompt_template = """
         Create a hyper-realistic, YouTube-style image based on the following paragraph. 
         The image should reflect the tone, environment, and subject matter of the paragraph.
@@ -35,6 +46,7 @@ class ImageGenerator:
         including any form of the word "fuck" or similar words, and any other profanities or slurs. 
         Ensure that only appropriate and respectful language is used throughout the prompt.
 
+        Context: {image_context}\n\n
         Paragraph: {paragraph_text}
         """
 
@@ -50,11 +62,15 @@ class ImageGenerator:
         """
         Generate a highly engaging prompt for creating a YouTube thumbnail.
         """
+
+        thumbnail_context = self.read_context_from_file("thumbnail_context.txt")
+
         prompt_template = """
         Generate a visually striking and engaging YouTube thumbnail image based on the following details.
         The thumbnail should be eye-catching, with vibrant colors, dramatic lighting, and bold composition.
         Ensure that the image captures attention and conveys the essence of the video topic.
-        
+
+        Context: {thumbnail_context}\n\n
         Video Title: {title}
         Video Topic: {video_topic}
         
