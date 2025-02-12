@@ -95,7 +95,7 @@ class ScriptGenerator:
                 return file.read().strip()
         return ""    
 
-    def generate_unique_video_title(self, recent_titles_file="data/recent_titles.txt"):
+    def generate_unique_video_title(self, video_details, recent_titles_file="data/recent_titles.txt"):
         """
         Generate a unique video title, ensuring it doesn't repeat recent titles.
         """
@@ -114,17 +114,19 @@ class ScriptGenerator:
 
         # Define prompt to generate a unique video title
         unique_title_prompt = PromptTemplate(
-            input_variables=["recent_titles", "title_context"],
+            input_variables=["recent_titles", "title_context", "video_details"],
             template=(
-                "Context: {title_context}\n\n"                
-                "Generate a unique and engaging YouTube video title that is between 60-70 characters long. "
-                "Avoid excessive punctuation or symbols. The title should be clear, concise, and relevant to the content. "
-                "Make sure it is different from the following recent titles:\n"
+                "Context: {title_context}\n\n"
+                "Video Details (Top Viewed Videos):\n"
+                "{video_details}\n\n"
+                "Instructions:\n"
+                "1. Based on the Top Viewed Videos, generate a unique and engaging YouTube video title between 60-70 characters long.\n"
+                "2. Slightly modify the original concept, incorporating elements from the top viewed videos.\n"
+                "3. Ensure the title is clear, concise, and relevant to the content.\n"
+                "4. Avoid excessive punctuation or symbols.\n"
+                "5. The title must be distinct from the following recent titles:\n"
                 "{recent_titles}\n\n"
-                "Think about what would catch the audience's attention while remaining true to the content."
-                "Ensure the title is no longer than 70 characters and no shorter than 60 characters. "
-                "If the title goes over 70 characters, adjust it slightly without losing its meaning. "
-                "If the title is under 60 characters, make it slightly longer but still relevant."                
+                "Consider what would capture the audience's attention while staying true to the content."
             )
         )
 
@@ -133,7 +135,7 @@ class ScriptGenerator:
 
         # Generate a new video title
         recent_titles_str = "\n".join(recent_titles) if recent_titles else "None"
-        video_title = title_chain.run({"recent_titles": recent_titles_str, "max_tokens": 10}).strip()
+        video_title = title_chain.run({"recent_titles": recent_titles_str, "title_context": title_context, "video_details": video_details}).strip()
 
         # Ensure the new title is added to the recent titles list and keep only the last 10
         recent_titles.append(video_title)
@@ -271,19 +273,19 @@ class ScriptGenerator:
         climax_and_return_chain = LLMChain(llm=self.llm, prompt=climax_and_return_prompt, memory=self.memory)
 
         # Generate video script parts
-        intro = intro_chain.run({"combined_input": combined_input})
+        intro = intro_chain.run({"combined_input": combined_input, "script_context": script_context})
         print("\nIntro section generated.")
-        call_to_adventure = call_to_adventure_chain.run({"combined_input": combined_input})
+        call_to_adventure = call_to_adventure_chain.run({"combined_input": combined_input, "script_context": script_context})
         print("Call to Adventure section generated.")
-        refusal_of_call = refusal_of_call_chain.run({"combined_input": combined_input})
+        refusal_of_call = refusal_of_call_chain.run({"combined_input": combined_input, "script_context": script_context})
         print("Refusal of Call section generated.")
-        mentor = mentor_chain.run({"combined_input": combined_input})
+        mentor = mentor_chain.run({"combined_input": combined_input, "script_context": script_context})
         print("Mentor section generated.")
-        crossing_the_threshold = crossing_the_threshold_chain.run({"combined_input": combined_input})
+        crossing_the_threshold = crossing_the_threshold_chain.run({"combined_input": combined_input, "script_context": script_context})
         print("Crossing the Threshold section generated.")
-        trials_and_allies = trials_and_allies_chain.run({"combined_input": combined_input})
+        trials_and_allies = trials_and_allies_chain.run({"combined_input": combined_input, "script_context": script_context})
         print("Trials and Allies section generated.")
-        climax_and_return = climax_and_return_chain.run({"combined_input": combined_input})
+        climax_and_return = climax_and_return_chain.run({"combined_input": combined_input, "script_context": script_context})
         print("Climax and Return section generated.")        
 
         # Ensure the directory exists for paragraphs

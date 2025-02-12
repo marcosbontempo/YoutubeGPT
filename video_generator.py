@@ -16,7 +16,7 @@ if __name__ == "__main__":
         video_details = script_generator.retrieve_video_details()  
 
         channel_context = script_generator.generate_channel_context(video_details)  
-        video_title = script_generator.generate_unique_video_title()  
+        video_title = script_generator.generate_unique_video_title(video_details)  
         
         combined_input = f"Channel Context: {channel_context}\nVideo Title: {video_title}"  
         script_generator.generate_video_script(combined_input)  

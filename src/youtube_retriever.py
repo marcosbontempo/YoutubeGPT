@@ -41,7 +41,7 @@ class YoutubeRetriever:
 
         return channel_ids
 
-    def get_video_details(self, channel_ids, max_results=5):
+    def get_video_details(self, channel_ids, max_results=10):
         """
         Retrieves video details (title and view count) for a list of channel IDs.
         :param channel_ids: A list of channel IDs
