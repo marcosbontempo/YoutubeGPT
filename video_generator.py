@@ -6,8 +6,9 @@ from src.script_generator import ScriptGenerator
 from src.audio_generator import AudioGenerator
 from src.image_generator import ImageGenerator
 from src.video_editor import VideoEditor
+from src.youtube_uploader import YouTubeUploader
 
-STEPS = [1, 2, 3, 4]
+STEPS = [1, 2, 3, 4, 5]
 
 if __name__ == "__main__":
     if 1 in STEPS:
@@ -35,5 +36,22 @@ if __name__ == "__main__":
         print("\n***** Step 4: Creating the video... *****")
         video_editor = VideoEditor()
         video_editor.create_video()  
+
+    if 5 in STEPS:
+        print("\n***** Step 5: Uploading the video to YouTube... *****")
+        client_secrets_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'youtube_credentials.json')
+        uploader = YouTubeUploader(client_secrets_file)
+
+        video_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tmp', 'videos', 'output_video.mp4')
+        thumbnail_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tmp', 'images', 'thumbnail.jpg')
+        paragraphs_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tmp', 'paragraphs')
+
+        with open(os.path.join(paragraphs_dir, 'video_title.txt'), 'r') as file:
+            title = file.read().strip()
+
+        with open(os.path.join(paragraphs_dir, 'seo_description.txt'), 'r') as file:
+            description = file.read().strip()
+
+        uploader.upload_video(video_file, title, description, thumbnail_file=thumbnail_file)
 
     print("\n***** Process completed successfully! *****")
